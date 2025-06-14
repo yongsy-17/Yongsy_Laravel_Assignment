@@ -59,7 +59,6 @@ class BookController extends Controller
                 return $book;
             }
         }
-        return null;
     }
     
 
