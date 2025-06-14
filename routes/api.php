@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthorsController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,14 @@ Route::prefix("/author")->group(function(){
     Route::post('/authors', [AuthorsController::class,"create"]);
     Route::put('/authors/{id}', [AuthorsController::class, "update"]);
     Route::delete("/authors/{id}",[AuthorsController::class,"destroy"]);
+});
+
+Route::prefix("/users")->group(function(){
+    Route::get("/user",[UserController::class,"index"]);
+    Route::get("/user/{id}",[UserController::class,"show"]);
+    Route::post("/user",[UserController::class,"create"]);
+    Route::put('/user/{id}', [UserController::class, 'update']);
+    Route::delete("/user/{id}",[UserController::class,"destroy"]);
 });
 
 
