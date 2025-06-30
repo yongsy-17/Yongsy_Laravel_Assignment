@@ -2,150 +2,88 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\CreateBookRequest;
 use App\Models\Book;
-use GuzzleHttp\Promise\Create;
+use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    public $Books=
-        [
-  [
-    "id"=> "1",
-    "authorId"=>"12",
-    "title"=>"Learning Laravel 10",
-    "isbn"=>"978-0-12345-678-9",
-    "publicationYear"=>2024,
-    "genre"=>"Technology",
-    "availableCopies"=>7
-  ],
-  [
-    "id"=>"2",
-    "authorId"=>"15",
-    "title"=>"Mastering PHP 8",
-    "isbn"=>"978-1-98765-432-0",
-    "publicationYear"=>2023,
-    "genre"=>"Programming",
-    "availableCopies"=>3
-  ],
-  [
-    "id"=>"3",
-    "authorId"=>"18",
-    "title"=>"The Art of APIs",
-    "isbn"=>"978-3-45678-901-2",
-    "publicationYear"=>2022,
-    "genre"=>"Software Development",
-    "availableCopies"=>5
-  ]
-];
+    // Show all books with author name
+    // public function index()
+    // {
+    //     $books = Book::with('author')->get();
 
-    /**
-     * Display a listing of the resource.
-     */
-      public function index(){
-        return response()->json([
-            'message' => 'Data successfully',
-            'data' => $this->Books,
-        ]);
-    }
+    //     return response()->json($books->map(function ($book) {
+    //         return [
+    //             'id' => $book->id,
+    //             'title' => $book->title,
+    //             'author' => $book->author ? $book->author->name : null
+    //         ];
+    //     }));
+    // }
 
-    /**
-     * GET /api/books/{id}: Retrieve a single book by its ID. 
-     */
-   public function show($id)
+    // Create a new book
+    public function create(CreateBookRequest $request)
     {
-        foreach ($this->Books as $book) {
-            if ($book['id'] == $id) {
-                return $book;
-            }
-        }
-    }
-    
-
-    /**
-     *  POST /api/books: Add a new book.
-     */
-     public function create(Request $request)
-    {
-        // Validate input
-        $validated = $request->validate([
-            'title' => 'required|string',
-            'authorId' => 'required|string',
-            'isbn' => 'nullable|string',
-            'publicationYear' => 'nullable|integer',
-            'genre' => 'nullable|string',
-            'availableCopies' => 'nullable|integer',
-        ]);
-
-        // book data
-        $newBook = [
-            "id" => rand(100, 999),
-            "title" => $validated['title'],
-            "authorId" => $validated['authorId'],
-            "isbn" => $validated['isbn'],
-            "publicationYear" => $validated['publicationYear'] ,
-            "genre" => $validated['genre'] ,
-            "availableCopies" => $validated['availableCopies'] ,
-        ];
+        $book = Book::create($request->validated()); // Use validated data only
 
         return response()->json([
-            'message' => 'created successfully!',
-            'data' => $newBook
+            'message' => 'Book created successfully',
+            'data' => $book
         ], 201);
     }
-    /**
-     * Update the specified resource in storage.
-     * PUT /api/books/{id}: Update an existing book by its ID.
-     */
-    public function update(Request $request, $id)
+
+    // Show book by id with author info
+     public function index()
     {
-        $data = $request->validate([
-            'title' => 'required|string',
-            'authorId' => 'required|string',
-            'isbn' => 'nullable|string',
-            'publicationYear' => 'nullable|integer',
-            'genre' => 'nullable|string',
-            'availableCopies' => 'nullable|integer',
+        return response()->json([
+            'message' => 'Get all authors',
+            'data' => Book::all(),
+        ], 200);
+    }
+
+  public function show($id)
+    {
+        $book = Book::with('author')->find($id);
+        return response()->json([
+            'id' => $book->id,
+            'title' => $book->title,
+            'isbn' => $book->isbn,
+            'publication_year' => $book->publication_year,
+            'genre' => $book->genre,
+            'available_copies' => $book->available_copies,
+            'author' => $book->author,
         ]);
+    }
 
-        foreach ($this->Books as $key => $book) {
-            if ($book['id'] == $id) {
-                $this->Books[$key] = array_merge($book, $data);
-                return response()->json([
-                    'message' => "Book with ID {$id} updated successfully!",
-                    'data' => $this->Books[$key]
-                ]);
-            }
+
+    // Update book by id
+    public function update(CreateBookRequest $request, $id)
+    {
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json(['message' => 'Book not found'], 404);
         }
 
-        return response()->json(['message' => "Book with ID {$id} not found."], 404);
+        $book->update($request->validated());
+
+        return response()->json([
+            'message' => 'Book updated successfully',
+            'data' => $book
+        ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-   public function destroy(string $id)
+    // Delete book by id
+    public function destroy($id)
     {
-        foreach ($this->Books as $key => $book) {
-            if ($book['id'] == $id) {
-                unset($this->Books[$key]);
-                $this->Books = array_values($this->Books); // reindex
-                return response()->json([
-                    'message' => "Book with ID {$id} deleted successfully!",
-                    'data' => $this->Books
-                ]);
-            }
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json(['message' => 'Book not found, cannot delete'], 404);
         }
 
-        return response()->json(['message' => "Book with ID {$id} not found."], 404);
-    }
+        $book->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return response()->json(['message' => 'Book deleted successfully'], 200);
     }
-
 }

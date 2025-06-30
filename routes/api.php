@@ -17,27 +17,27 @@ use Illuminate\Support\Facades\Route;
 |
 */
 // Route book
-Route::prefix("/book")->group(function() {
-Route::get("/books",[BookController::class,"index"]);
-Route::get("/books/{id}",[BookController::class,"show"]);
-Route::post("/books", [BookController::class, "create"]);
-Route::put("/books/{id}", [BookController::class, "update"]);
-Route::delete("/books/{id}", [BookController::class, "destroy"]);
+Route::prefix("/books")->group(function() {
+Route::get("/",[BookController::class,"index"]);
+Route::get("/{id}",[BookController::class,"show"]);
+Route::post("/", [BookController::class, "create"]);
+Route::put("/{id}", [BookController::class, "update"]);
+Route::delete("/{id}", [BookController::class, "destroy"]);
 });
-Route::prefix("/author")->group(function(){
-    Route::get("/authors",[AuthorsController::class,"index"]);
-    Route::get("/authors/{id}",[AuthorsController::class,"show"]);
-    Route::post('/authors', [AuthorsController::class,"create"]);
-    Route::put('/authors/{id}', [AuthorsController::class, "update"]);
-    Route::delete("/authors/{id}",[AuthorsController::class,"destroy"]);
+Route::prefix("/authors")->group(function(){
+    Route::get("/",[AuthorsController::class,"index"]);
+    Route::get("/{id}",[AuthorsController::class,"show"]);
+    Route::post("/", [AuthorsController::class,"create"]);
+    Route::put("/{id}", [AuthorsController::class, "update"]);
+    Route::delete("/{id}",[AuthorsController::class,"destroy"]);
 });
 
 Route::prefix("/users")->group(function(){
-    Route::get("/user",[UserController::class,"index"]);
-    Route::get("/user/{id}",[UserController::class,"show"]);
-    Route::post("/user",[UserController::class,"create"]);
-    Route::put('/user/{id}', [UserController::class, 'update']);
-    Route::delete("/user/{id}",[UserController::class,"destroy"]);
+    Route::get("/",[UserController::class,"index"]);
+    Route::get("/{id}",[UserController::class,"show"]);
+    Route::post("/",[UserController::class,"create"]);
+    Route::put("/{id}", [UserController::class, 'update']);
+    Route::delete("/{id}",[UserController::class,"destroy"]);
 });
 
 

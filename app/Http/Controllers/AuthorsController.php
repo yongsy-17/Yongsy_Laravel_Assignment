@@ -2,141 +2,102 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Author;
 use Illuminate\Http\Request;
-use Laravel\Prompts\Key;
-use PharIo\Manifest\Author;
 
 class AuthorsController extends Controller
 {
-    public $Authors = [
-    [
-        "id" => "1",
-        "name" => "John Doe",
-        "bio" => "Author and software engineer.",
-        "nationality" => "American"
-    ],
-    [
-        "id" => "2",
-        "name" => "Jane Smith",
-        "bio" => "Novelist and historian.",
-        "nationality" => "British"
-    ],
-    [
-        "id" => "3",
-        "name" => "Michael Johnson",
-        "bio" => "Technical writer and editor.",
-        "nationality" => "Canadian"
-    ],
-    [
-        "id" => "4",
-        "name" => "Emily Davis",
-        "bio" => "Researcher and academic author.",
-        "nationality" => "Australian"
-    ],
-];
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json([
-            "message"=>"Get data successfully",
-            "data"=>$this->Authors,
-        ]);
+            'message' => 'Get all authors',
+            'data' => Author::all(),
+        ], 200);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a newly created author.
      */
     public function create(Request $request)
     {
         $validated = $request->validate([
-            'id' => 'required|string',
-            'name' => 'required|string',
-            'bio' => 'required|string',
-            'nationality' => 'required|string',
+            'name' => 'required|string|max:255',
+            'bio' => 'nullable|string',
+            'nationality' => 'nullable|string|max:255',
         ]);
 
-        $newAuthor = [
-            'id' => $validated['id'],
-            'name' => $validated['name'],
-            'bio' => $validated['bio'],
-            'nationality' => $validated['nationality'],
-        ];
+        $author = Author::create($validated);
 
         return response()->json([
-            'message' => 'Created successfully',
-            'data' => $newAuthor
+            'message' => 'Author created successfully',
+            'data' => $author
         ], 201);
     }
 
-
     /**
-     * Display the specified resource.
+     * Display the specified author.
      */
-    public function show(string $id)
-    {
-        foreach($this->Authors as $Author){
-            if ($Author["id"]==$id){
-                return $Author;
-            }
-        }
-    }
+   
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function show($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        // Validate input (no need for 'id' because you get it from the URL)
-        $data = $request->validate([
-            'name' => 'required|string',
-            'bio' => 'required|string',
-            'nationality' => 'required|string',
+        $author = Author::with('books')->find($id);
+        return response()->json([
+            'id' => $author->id,
+            'name' => $author->name,
+            'bio' => $author->bio,
+            'nationality' => $author->nationality,
+            'books' => $author->books,
         ]);
+    }
 
-        // Find and update
-        foreach ($this->Authors as $key => $Author) {
-            if ($Author["id"] == $id) {
-                // Correct assignment
-                $this->Authors[$key] = array_merge($Author, $data);
 
-                return response()->json([
-                    "message" => "Author {$id} updated successfully",
-                    "data" => $this->Authors[$key]
-                ]);
-            }
+
+
+
+
+    /**
+     * Update the specified author.
+     */
+    public function update(Request $request, string $id)
+    {
+        $author = Author::find($id);
+
+        if (!$author) {
+            return response()->json(['message' => 'Author not found'], 404);
         }
 
-        return response()->json(['message' => "Author with ID {$id} not found."], 404);
+        $author->update($request->all());
+
+        return response()->json([
+            'message' => 'Author updated successfully',
+            'data' => $author
+        ], 200);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified author.
      */
-    public function destroy(string $id)
+    public function delete(string $id)
     {
-        foreach ($this->Authors as $key => $Author) {
-            if ($Author['id'] == $id) {
-                unset($this->Authors[$key]);
-                $this->Authors = array_values($this->Authors); // reindex
-                return response()->json([
-                    'message' => "Author with ID {$id} deleted successfully!",
-                    'data' => $this->Authors
-                ]);
-            }
+        $author = Author::find($id);
+
+        if (!$author) {
+            return response()->json([
+                'message' => 'Author not found, cannot delete'
+            ], 404);
         }
 
-        return response()->json(['message' => "Author with ID {$id} not found."], 404);
-    }
-}
+        $author->delete();
 
+        return response()->json([
+            'message' => 'Author deleted successfully',
+            'data' => $author
+        ], 200);
+    }
+
+    /**
+     * Show all books created by the specified author ID.
+     */
+    
+}
